@@ -12,9 +12,7 @@
 	#  include <GL/glut.h>
 	#endif
 
-
-void display(void) 
-{ 
+void display(void) { 
 	glClear( GL_COLOR_BUFFER_BIT); 
 	glColor3f(0.0, 1.0, 0.0); 
 	glBegin(GL_POLYGON); 
@@ -26,8 +24,17 @@ void display(void)
 	glFlush(); 
 }
 
-int main(int argc, char **argv) 
-{ 
+void keySpecial(int key, int x, int y) {
+	switch(key) {
+		case 27 :      break;
+		case 100 : printf("GLUT_KEY_LEFT %d\n",key);   break;
+		case 102: printf("GLUT_KEY_RIGHT %d\n",key);  ;  break;
+		case 101   : printf("GLUT_KEY_UP %d\n",key);  ;  break;
+		case 103 : printf("GLUT_KEY_DOWN %d\n",key);  ;  break;
+	};
+}
+
+int main(int argc, char **argv) {
 	printf("hello world\n"); 
 	glutInit(&argc, argv); 
 	glutInitDisplayMode ( GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
@@ -37,6 +44,8 @@ int main(int argc, char **argv)
 	glutInitWindowSize(500,500); 
 	glutCreateWindow ("SNAKE 2000");
 
+	glutSpecialFunc(keySpecial);
+   
 	glClearColor(0.0, 0.0, 0.0, 0.0);         // black background 
 	glMatrixMode(GL_PROJECTION);              // setup viewing projection 
 	glLoadIdentity();                           // start with identity matrix 
