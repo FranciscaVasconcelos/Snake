@@ -12,7 +12,7 @@
 	#  include <GL/glut.h>
 	#endif
 
-#define GAME_STATE 		1	// 0=splash page, 1=play game
+int GAME_STATE=1;
 #define GAME_SIZE 		50	// # of squares in game
 #define SQUARE_UNIT 	10	// size of sqaure in terms of pixels
 
@@ -25,7 +25,8 @@ class Square {
     	double x, y;
     	int size;
   	public:
-	    // constructor
+	    // constructors
+	    Square(){}
 	    Square(double x1, double y1, int size1){
 			x = x1;
 			y = y1;
@@ -43,11 +44,11 @@ class Square {
 		int set_Size() {return size;}
 
 		void draw(){
+			glClearColor(0.0, 50.0, 0.0, 0.0);
 			glVertex3f(x, y, 0.0); 
 			glVertex3f(x, y+size, 0.0); 
 			glVertex3f(x+size, y+size, 0.0); 
 			glVertex3f(x+size, y, 0.0);
-			glutPostRedisplay();
 		}
 };
 
@@ -55,6 +56,7 @@ class Snake : public Square{
 	private:
     	int number; // number in snake queue, when block is at tail, value is 0
   	public:
+  		static int snake_length;
 	  	// constructor
 	    Snake(double x1, double y1, int s1, int num):Square(x1,y1,s1){
 			number = num;
@@ -81,21 +83,40 @@ class Comida : public Square{
 /***************************************************************/
 
 
+Square GAME_GRID[GAME_SIZE][GAME_SIZE]; 
 
-Square *GAME_GRID[GAME_SIZE][GAME_SIZE] = {NULL};
+void timer(int)
+{
+    /* update animation */
+    glutPostRedisplay();
+}
 
+
+// MAIN FUNCTION FOR GRAPHICS
 void display(void) { 
 	glClear( GL_COLOR_BUFFER_BIT); 
-	glColor3f(0.0, 1.0, 0.0); 
 	switch(GAME_STATE){
 		case 0: // SPLASH
+			glColor3f(0.0, 1.0, 0.0); 
+			glBegin(GL_POLYGON); 
+			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2] = Snake(GAME_SIZE/2*SQUARE_UNIT+30, GAME_SIZE/2*SQUARE_UNIT+30,SQUARE_UNIT,0);
+			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
+			glEnd(); 
+			glFlush(); 
+			GAME_STATE=1;
+			glutTimerFunc(1000.0, timer, 0);
 			break;
 		case 1: // PlAY GAME
+			glColor3f(0.0, 1.0, 0.0); 
+			glBegin(GL_POLYGON); 
+			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2] = Snake(GAME_SIZE/2*SQUARE_UNIT, GAME_SIZE/2*SQUARE_UNIT,SQUARE_UNIT,0);
+			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
+			glEnd(); 
+			glFlush(); 
+			GAME_STATE=0;
+			glutTimerFunc(1000.0, timer, 0);
 			break;
 	} 
-	glutPostRedisplay();
-	glEnd(); 
-	glFlush();
 }
 
 void keySpecial(int key, int x, int y) {
