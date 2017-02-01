@@ -70,6 +70,7 @@ class Square {
 			glBegin(GL_POLYGON);
 			if(snake) {glClearColor(0.0, 50.0, 0.0, 0.0);}
 			else if(food) {glClearColor(50.0, 0.0, 0.0, 0.0);}
+			else{glClearColor(0.0, 0.0, 0.0, 50.0);}
 			glVertex2f(x, y); 
 			glVertex2f(x, y+size); 
 			glVertex2f(x+size, y+size); 
@@ -113,129 +114,174 @@ void timer(int)
     glutPostRedisplay();
 }
 
+void splashPage(){
+	glEnd(); 
+	glFlush(); 
+	printf("%d %d\n", food_x,food_y);
+	glutTimerFunc(200.0, timer, 0);
+}
+
+void gameInitialize(){
+	glColor3f(0.0, 1.0, 0.0);
+	direction = 0;
+	for(int i=0; i<GAME_SIZE; i++){
+		for(int j=0; j<GAME_SIZE; j++){
+			GAME_GRID[i][j] = Square(i*GAME_SIZE,j*GAME_SIZE,SQUARE_UNIT);
+		}
+	}
+	GAME_GRID[GAME_SIZE/2][GAME_SIZE/2] = Snake(GAME_SIZE/2*SQUARE_UNIT, GAME_SIZE/2*SQUARE_UNIT,SQUARE_UNIT);
+	GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].set_Number(GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].get_Number()+1);
+	//GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
+	//GAME_GRID[food_y][food_x].draw();
+	srand(time(NULL));
+	food_x = rand()%GAME_SIZE;
+	food_y = rand()%GAME_SIZE;
+
+	GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
+
+	glEnd(); 
+	glFlush(); 
+	glutTimerFunc(200.0, timer, 0);
+	GAME_STATE = 2;	
+}
+
+void playGame(){
+	std::cout << direction << std::endl;
+	glColor3f(0.0, 1.0, 0.0); 
+	glBegin(GL_POLYGON); 
+	for(int i=0; i<GAME_SIZE; i++){
+		bool up = false;
+		for(int j=0; j<GAME_SIZE; j++){
+			if(GAME_GRID[i][j].is_Snake()) {
+				//std::cout << GAME_GRID[i][j].get_Number() << " ?= " << snake_length << std::endl;
+				if(GAME_GRID[i][j].is_Head()==true){
+					if(direction==0){ // UP
+						std::cout << "SQUARE ABOVE" << std::endl;
+						if(!GAME_GRID[i+1][j].is_Snake() && (i+1)<GAME_SIZE) {
+							if(GAME_GRID[i+1][j].is_Food()){
+								snake_length += 1;
+								food_x = rand()%GAME_SIZE;
+								food_y = rand()%GAME_SIZE;
+
+								GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
+							}
+							GAME_GRID[i+1][j]=Snake(j*SQUARE_UNIT,(i+1)*SQUARE_UNIT,SQUARE_UNIT);
+							GAME_GRID[i+1][j].set_Head(true);
+							GAME_GRID[i][j].set_Head(false);
+						}
+						else{
+							std::cout << "GAME OVER" << std::endl;
+							GAME_STATE=0;
+						}
+						up = true;
+						break;
+					}
+					else if(direction==1){ // RIGHT
+						std::cout << "SQUARE RIGHT" << std::endl;
+						if(!GAME_GRID[i][j+1].is_Snake() && (j+1)<GAME_SIZE) {
+							if(GAME_GRID[i][j+1].is_Food()){
+								snake_length += 1;
+								srand(time(NULL));
+								food_x = rand()%GAME_SIZE;
+								food_y = rand()%GAME_SIZE;
+
+								GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
+							}
+							GAME_GRID[i][j+1]=Snake((j+1)*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);
+							GAME_GRID[i][j+1].set_Head(true);
+							GAME_GRID[i][j].set_Head(false);
+						}
+						else{
+							std::cout << "GAME OVER" << std::endl;
+							GAME_STATE=0;
+						}
+						break;
+					}
+					else if(direction==2){ // LEFT
+						std::cout << "SQUARE DOWN" << std::endl;
+						if(!GAME_GRID[i-1][j].is_Snake() && (i-1)>=0) {
+							if(GAME_GRID[i-1][j].is_Food()){
+								snake_length += 1;
+								food_x = rand()%GAME_SIZE;
+								food_y = rand()%GAME_SIZE;
+
+								GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
+							}
+							GAME_GRID[i-1][j]=Snake(j*SQUARE_UNIT,(i-1)*SQUARE_UNIT,SQUARE_UNIT);
+							GAME_GRID[i-1][j].set_Head(true);
+							GAME_GRID[i][j].set_Head(false);
+						}
+						else{
+							std::cout << "GAME OVER" << std::endl;
+							GAME_STATE=0;
+						}
+						break;
+					}
+					else if(direction == 3){ // DOWN
+						std::cout << "SQUARE LEFT" << std::endl;
+						if(!GAME_GRID[i][j-1].is_Snake() && (j-1)>=0) {
+							if(GAME_GRID[i][j-1].is_Food()){
+								snake_length += 1;
+								food_x = rand()%GAME_SIZE;
+								food_y = rand()%GAME_SIZE;
+
+								GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
+							}
+							GAME_GRID[i][j-1]=Snake((j-1)*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);
+							GAME_GRID[i][j-1].set_Head(true);
+							GAME_GRID[i][j].set_Head(false);
+						}
+						else{
+							std::cout << "GAME OVER" << std::endl;
+							GAME_STATE=0;
+						}
+						break;
+					}
+				}
+			}
+		}
+		if(up==true){break;}
+	}
+	for(int i=0; i<GAME_SIZE; i++){
+		for(int j=0; j<GAME_SIZE; j++){
+			if(GAME_GRID[i][j].is_Snake() || GAME_GRID[i][j].is_Food()) {
+				GAME_GRID[i][j].draw();
+			}
+			if(GAME_GRID[i][j].get_Number()==snake_length) {
+				GAME_GRID[i][j] = Square(j*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);\
+				GAME_GRID[i][j].set_Snake(false);
+			}
+			if(GAME_GRID[i][j].is_Snake()) {GAME_GRID[i][j].set_Number(GAME_GRID[i][j].get_Number()+1);}
+			if(GAME_GRID[i][j].get_Number() != 0) {std::cout << GAME_GRID[i][j].get_Number();}
+			//std::cout << GAME_GRID[i][j].get_Number() << std::endl;
+		}
+	}		
+	//GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
+	//GAME_STATE=1;
+	glEnd(); 
+	glFlush(); 
+	glutTimerFunc(100.0, timer, 0);
+}
 
 // MAIN FUNCTION FOR GRAPHICS
 void display(void) { 
 	glClear( GL_COLOR_BUFFER_BIT); 
 	switch(GAME_STATE){
 		case 0: // SPLASH
-			glEnd(); 
-			glFlush(); 
-			printf("%d %d\n", food_x,food_y);
-			glutTimerFunc(200.0, timer, 0);
+			splashPage();
 			break;
 		case 1: // INITIALIZE GAME
-			glColor3f(0.0, 1.0, 0.0);
-			direction = 0;
-			for(int i=0; i<GAME_SIZE; i++){
-				for(int j=0; j<GAME_SIZE; j++){
-					GAME_GRID[i][j] = Square(i*GAME_SIZE,j*GAME_SIZE,SQUARE_UNIT);
-				}
-			}
-			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2] = Snake(GAME_SIZE/2*SQUARE_UNIT, GAME_SIZE/2*SQUARE_UNIT,SQUARE_UNIT);
-			GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].set_Number(GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].get_Number()+1);
-			//GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
-			//GAME_GRID[food_y][food_x].draw();
-			srand(time(NULL));
-			food_x = rand()%GAME_SIZE;
-			food_y = rand()%GAME_SIZE;
-
-			glEnd(); 
-			glFlush(); 
-			glutTimerFunc(200.0, timer, 0);
-			GAME_STATE = 2;	
+			gameInitialize();
 			break;
 		case 2: // PLAY GAME
-			std::cout << direction << std::endl;
-			glColor3f(0.0, 1.0, 0.0); 
-			glBegin(GL_POLYGON); 
-			for(int i=0; i<GAME_SIZE; i++){
-				bool up = false;
-				for(int j=0; j<GAME_SIZE; j++){
-					if(GAME_GRID[i][j].is_Snake()) {
-						std::cout << GAME_GRID[i][j].get_Number() << " ?= " << snake_length << std::endl;
-						if(GAME_GRID[i][j].is_Head()==true){
-							if(direction==0){ // UP
-								std::cout << "SQUARE ABOVE" << std::endl;
-								if(!GAME_GRID[i+1][j].is_Snake() && (i+1)<GAME_SIZE) {
-									GAME_GRID[i+1][j]=Snake(j*SQUARE_UNIT,(i+1)*SQUARE_UNIT,SQUARE_UNIT);
-									GAME_GRID[i+1][j].set_Head(true);
-									GAME_GRID[i][j].set_Head(false);
-								}
-								else{
-									std::cout << "GAME OVER" << std::endl;
-									GAME_STATE=0;
-								}
-								up = true;
-								break;
-							}
-							else if(direction==1){ // RIGHT
-								std::cout << "SQUARE RIGHT" << std::endl;
-								if(!GAME_GRID[i][j+1].is_Snake() && (j+1)<GAME_SIZE) {
-									GAME_GRID[i][j+1]=Snake((j+1)*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);
-									GAME_GRID[i][j+1].set_Head(true);
-									GAME_GRID[i][j].set_Head(false);
-								}
-								else{
-									std::cout << "GAME OVER" << std::endl;
-									GAME_STATE=0;
-								}
-								break;
-							}
-							else if(direction==2){ // LEFT
-								std::cout << "SQUARE DOWN" << std::endl;
-								if(!GAME_GRID[i-1][j].is_Snake() && (i-1)>=0) {
-									GAME_GRID[i-1][j]=Snake(j*SQUARE_UNIT,(i-1)*SQUARE_UNIT,SQUARE_UNIT);
-									GAME_GRID[i-1][j].set_Head(true);
-									GAME_GRID[i][j].set_Head(false);
-								}
-								else{
-									std::cout << "GAME OVER" << std::endl;
-									GAME_STATE=0;
-								}
-								break;
-							}
-							else if(direction == 3){ // DOWN
-								std::cout << "SQUARE LEFT" << std::endl;
-								if(!GAME_GRID[i][j-1].is_Snake() && (j-1)>=0) {
-									GAME_GRID[i][j-1]=Snake((j-1)*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);
-									GAME_GRID[i][j-1].set_Head(true);
-									GAME_GRID[i][j].set_Head(false);
-								}
-								else{
-									std::cout << "GAME OVER" << std::endl;
-									GAME_STATE=0;
-								}
-								break;
-							}
-						}
-					}
-				}
-				if(up==true){break;}
-			}
-			GAME_GRID[food_y][food_x] = Comida(food_x*SQUARE_UNIT, food_y*SQUARE_UNIT,SQUARE_UNIT);
-			for(int i=0; i<GAME_SIZE; i++){
-				for(int j=0; j<GAME_SIZE; j++){
-					if(GAME_GRID[i][j].is_Snake() || GAME_GRID[i][j].is_Food()) {
-						GAME_GRID[i][j].draw();
-					}
-					if(GAME_GRID[i][j].get_Number()==snake_length) {
-						GAME_GRID[i][j] = Square(j*SQUARE_UNIT,i*SQUARE_UNIT,SQUARE_UNIT);\
-						GAME_GRID[i][j].set_Snake(false);
-					}
-					if(GAME_GRID[i][j].is_Snake()) {GAME_GRID[i][j].set_Number(GAME_GRID[i][j].get_Number()+1);}
-					if(GAME_GRID[i][j].get_Number() != 0) {std::cout << GAME_GRID[i][j].get_Number();}
-					//std::cout << GAME_GRID[i][j].get_Number() << std::endl;
-				}
-			}		
-			//GAME_GRID[GAME_SIZE/2][GAME_SIZE/2].draw();
-			//GAME_STATE=1;
-			glEnd(); 
-			glFlush(); 
-			glutTimerFunc(100.0, timer, 0);
+			playGame();
 			break;
 	} 
 }
+
+/***************************************************************/
+/************************ KEYBOARD INPUT ***********************/
+/***************************************************************/
 
 void keySpecial(int key, int x, int y) {
 	switch(key) {
